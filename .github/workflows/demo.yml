@@ -63,7 +63,7 @@ jobs:
       - name: Run a container
         run: | 
             docker run -d --name test1 -p 8080:80 ${{ env.REGISTRY }}/nginx
-            docker run -d --name test2 -p 127.0.0.1:8081:80 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker run -d --name test2 -p 127.0.0.1:8081:500 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             docker ps 
 
 
