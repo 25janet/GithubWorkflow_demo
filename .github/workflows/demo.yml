@@ -49,6 +49,7 @@ jobs:
       - name: Build  docker image
         run: |
             docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+
       
       - name: Push to docker registry
         run: |
