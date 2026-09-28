@@ -1,5 +1,9 @@
 name: CI Pipeline
 
+env:
+    REGISTRY: docker.io
+    IMAGE_NAME: 25janet/mypythonapp
+
 on:
   push:
     branches: [ "master", "Feature-branch"]
@@ -13,7 +17,7 @@ jobs:
     steps:
     - name: Checkout repository code
       uses: actions/checkout@v4
-
+    
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -27,3 +31,40 @@ jobs:
     - name: Run automated tests
       run: |
         pytest
+  
+  build-push-pull:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps: 
+      - name: Checkout Repository code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker
+        uses: docker/checkout@v3
+        with: 
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            passowrd: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build  docker image
+        run: |
+            docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      
+      - name: Push to docker registry
+        run: |
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      
+      - name: Pull from docker registry
+        run: |
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/nginx
+      
+      - name: Run a container
+        run: | 
+            docker run -d --name test1 -p 8080:80 ${{ env.REGISTRY }}/nginx
+            docker run -d --name test2 -p 127.0.0.1:8081:80 ${{ env.REGISTRY }}/ ${{ env.IMAGE_NAME }}:latest
+            docker ps 
+
+
+      
+
