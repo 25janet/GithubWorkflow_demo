@@ -6,6 +6,6 @@ COPY requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 5000
+COPY app.py  test_app.py /app/
 
-CMD ["python", "test_app.py"]
+CMD ["pytest"]
