@@ -16,19 +16,22 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                echo 'Checkout the repository code...'
-                checkout scm
+       stage('Test') {
+    steps {
+        echo 'Checkout the repository code...'
+        checkout scm
 
-                echo 'Install dependencies...'
-                sh 'python3 -m pip install --upgrade pip'
-                sh 'pip3 install -r requirements.txt'
+        echo 'Create Python virtual environment...'
+        sh 'python3 -m venv .venv'
 
-                echo 'Run automated tests...'
-                sh 'pytest'
-            }
-        }
+        echo 'Install dependencies...'
+        sh '.venv/bin/python -m pip install --upgrade pip'
+        sh '.venv/bin/pip install -r requirements.txt'
+
+        echo 'Run automated tests...'
+        sh '.venv/bin/pytest'
+    }
+}
 
         stage('Log in to Docker') {
             steps {
