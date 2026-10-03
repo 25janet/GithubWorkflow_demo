@@ -1,9 +1,6 @@
 pipeline {
-    agent {
-        docker {
-            image 'ubuntu:latest'
-        }
-    }
+
+    agent any
 
     environment {
         REGISTRY = 'docker.io'
@@ -20,27 +17,15 @@ pipeline {
         }
 
         stage('Test') {
-            agent {
-                docker {
-                    image 'python:3.14-alpine'
-                    reuseNode true
-                }
-            }
-
             steps {
                 echo 'Checkout the repository code...'
-
-                sh 'apk add --no-cache git'
-
                 checkout scm
 
                 echo 'Install dependencies...'
+                sh 'python3 -m pip install --upgrade pip'
+                sh 'pip3 install -r requirements.txt'
 
-                sh 'python -m pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
-
-                echo 'Run automated tests'
-
+                echo 'Run automated tests...'
                 sh 'pytest'
             }
         }
@@ -65,11 +50,11 @@ pipeline {
 
         stage('Build-and-Push') {
             steps {
-                echo 'Build Docker image'
+                echo 'Build Docker image...'
 
                 sh "docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}:latest ."
 
-                echo 'Push image to Registry'
+                echo 'Push image to Docker Hub...'
 
                 sh "docker push ${env.REGISTRY}/${env.IMAGE_NAME}:latest"
             }
