@@ -37,7 +37,7 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'github-ai-health-assistant',
+                        credentialsId: 'docker-credentials',
                         usernameVariable: 'DOCKERHUB_USERNAME',
                         passwordVariable: 'DOCKERHUB_TOKEN2'
                     )
