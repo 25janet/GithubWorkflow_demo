@@ -66,37 +66,33 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-        # set -e is a bash safety testing , to stop executing script if a command fails
-        script: |
-          
-          set -e
+          # set -e stops the script if an important command fails
+          script: |
 
-          echo "Connected to the Remote server"
+            set -e
 
-          echo "Checking Containerd"
-          sudo containerd --version
+            echo "Connected to the Remote server"
 
-          echo "Checking nerdctl"
-          sudo nerdctl --version
+            echo "Checking Containerd"
+            sudo containerd --version
 
-          echo "Pulling image from Docker Hub"
-          sudo nerdctl --address /run/containerd/containerd.sock pull \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            echo "Checking nerdctl"
+            sudo nerdctl --version
 
-          echo "Removing previous container if it exists"
-          sudo nerdctl --address /run/containerd/containerd.sock rm -f mypythonapp || true
+            echo "Pulling image from Docker Hub"
+            sudo nerdctl --address /run/containerd/containerd.sock pull \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-          echo "Running container"
-          sudo nerdctl --address /run/containerd/containerd.sock run -d \
-            --name mypythonapp \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            echo "Removing previous container if it exists"
+            sudo nerdctl --address /run/containerd/containerd.sock rm -f mypythonapp || true
 
-          echo "Checking container status"
-          sudo nerdctl --address /run/containerd/containerd.sock ps -a
+            echo "Running container"
+            sudo nerdctl --address /run/containerd/containerd.sock run -d \
+              --name mypythonapp \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-          echo "Showing test results from container"
-          sudo nerdctl --address /run/containerd/containerd.sock logs mypythonapp
+            echo "Checking container status"
+            sudo nerdctl --address /run/containerd/containerd.sock ps -a
 
-
-      
-
+            echo "Showing test results from container"
+            sudo nerdctl --address /run/containerd/containerd.sock logs mypythonapp
