@@ -61,29 +61,41 @@ jobs:
     steps:
       - name: Deploy using SSH
         uses: appleboy/ssh-action@v1.0.3
-        with: 
-              host: ${{ secrets.SSH_HOST }}
-              username: ${{ secrets.SSH_USERNAME }}
-              key: ${{ secrets.SSH_PRIVATE_KEY}}
-              port: 22
-        script: | 
-            echo "Connected to the Remote server"
-
-            echo "Checking Containerd version"
-            containerd --version
-
-            echo "Checking nerdctl"
-            nerdctl --version
-
-            echo " Pulling an Image from the registry"
-            nerdctl pull ${{ env.REGISTRY}}/{{ env.IMAGE_NAME }}:latest
-
-            echo "Running a container using the pulled image"
-            nerdctl run -d --name mypythonapp ${{ env.REGISTRY }}/{{ env.IMAGE_NAME }}:latest
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+        # set -e is a bash safety testing , to stop executing script if a command fails
+        script: |
           
-            echo "Checking Running containers"
-            nerdctl ps
+          set -e
 
+          echo "Connected to the Remote server"
+
+          echo "Checking Containerd"
+          sudo containerd --version
+
+          echo "Checking nerdctl"
+          sudo nerdctl --version
+
+          echo "Pulling image from Docker Hub"
+          sudo nerdctl --address /run/containerd/containerd.sock pull \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+          echo "Removing previous container if it exists"
+          sudo nerdctl --address /run/containerd/containerd.sock rm -f mypythonapp || true
+
+          echo "Running container"
+          sudo nerdctl --address /run/containerd/containerd.sock run -d \
+            --name mypythonapp \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+          echo "Checking container status"
+          sudo nerdctl --address /run/containerd/containerd.sock ps -a
+
+          echo "Showing test results from container"
+          sudo nerdctl --address /run/containerd/containerd.sock logs mypythonapp
 
 
       
