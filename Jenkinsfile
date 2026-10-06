@@ -2,6 +2,10 @@ pipeline {
 
     agent any
 
+    triggers {
+        pollSCM('0 H/4 * * *')
+    }
+
     environment {
         REGISTRY = 'docker.io'
         IMAGE_NAME = 'janetjohn15/mypythonapp'
