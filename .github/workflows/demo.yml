@@ -67,8 +67,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           # set -e stops the script if an important command fails
-      - name: Build docker image
-        run: docker compose build
           script: |
 
             set -e
