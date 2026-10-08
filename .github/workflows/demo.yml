@@ -67,6 +67,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           # set -e stops the script if an important command fails
+      - name: Build docker image
+        run: docker compose build
           script: |
 
             set -e
@@ -79,17 +81,18 @@ jobs:
             echo "Checking nerdctl"
             sudo nerdctl --version
 
+            echo "Checking nerdctl compose version"
+            sudo nerdctl --address /run/containerd/containerd.sock compose version
+
+            echo "Moving to application directory"
+            cd /mnt/c/Users/user/Documents/github_workflow
+
             echo "Pulling image from Docker Hub"
             sudo nerdctl --address /run/containerd/containerd.sock pull \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-            echo "Removing previous container if it exists"
-            sudo nerdctl --address /run/containerd/containerd.sock rm -f mypythonapp || true
-
-            echo "Running container"
-            sudo nerdctl --address /run/containerd/containerd.sock run -d \
-              --name mypythonapp \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            echo "Starting container with compose"
+            sudo nerdctl --address /run/containerd/container.sock compose up -d
 
             echo "Checking container status"
             sudo nerdctl --address /run/containerd/containerd.sock ps -a
