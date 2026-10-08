@@ -59,40 +59,43 @@ jobs:
     needs: build-and-push
 
     steps:
+
       - name: Deploy using SSH
         uses: appleboy/ssh-action@v1.0.3
+
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          # set -e stops the script if an important command fails
-          script: |
 
+          script: |
             set -e
 
             echo "Connected to the Remote server"
 
+            echo "Moving to project directory"
+            cd /mnt/c/Users/user/Documents/github_workflow
+
+            echo "Updating project files"
+            git pull origin master
+
             echo "Checking Containerd"
             sudo containerd --version
 
-            echo "Checking nerdctl"
-            sudo nerdctl --version
+            echo "Checking nerdctl Compose"
+            sudo nerdctl --address /run/containerd/containerd.sock compose version
 
-            echo "Pulling image from Docker Hub"
+            echo "Pulling latest Docker image"
             sudo nerdctl --address /run/containerd/containerd.sock pull \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-            echo "Removing previous container if it exists"
-            sudo nerdctl --address /run/containerd/containerd.sock rm -f mypythonapp || true
+            echo "Starting application with Compose"
+            sudo nerdctl --address /run/containerd/containerd.sock compose up -d
 
-            echo "Running container"
-            sudo nerdctl --address /run/containerd/containerd.sock run -d \
-              --name mypythonapp \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-            echo "Checking container status"
+            echo "Checking containers"
             sudo nerdctl --address /run/containerd/containerd.sock ps -a
 
-            echo "Showing test results from container"
-            sudo nerdctl --address /run/containerd/containerd.sock logs mypythonapp
+            echo "Showing application logs"
+            sudo nerdctl --address /run/containerd/containerd.sock logs \
+              github_workflow-mypythonapp-1
