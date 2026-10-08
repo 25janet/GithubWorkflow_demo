@@ -73,8 +73,8 @@ pipeline {
         stage('Deploy Via SSH') {
             environment {
                 // Change these three values to match your ngrok status and WSL account
-                SSH_HOST = '0.tcp.in.ngrok.io' 
-                SSH_PORT = '22586' 
+                SSH_HOST = '0.tcp.ap.ngrok.io' 
+                SSH_PORT = '18060' 
                 SSH_USER = 'janet_john' 
             }
             steps {
