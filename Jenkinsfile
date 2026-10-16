@@ -2,6 +2,11 @@ pipeline {
 
     agent any
 
+    triggers {
+        pollSCM('0 H/4 * * *')
+        githubPush()
+    }
+
     environment {
         REGISTRY = 'docker.io'
         IMAGE_NAME = 'janetjohn15/mypythonapp'
@@ -68,8 +73,10 @@ pipeline {
         stage('Deploy Via SSH') {
             environment {
                 // Change these three values to match your ngrok status and WSL account
-                SSH_HOST = '0.tcp.ngrok.io' 
-                SSH_PORT = '10371' 
+
+                SSH_HOST = '0.tcp.in.ngrok.io' 
+                SSH_PORT = '22586' 
+
                 SSH_USER = 'janet_john' 
             }
             steps {
